@@ -18,6 +18,10 @@ pred userInvariants[u: User] {
 	//all u1, u2: User | cannotViewOthersPrivatePosts[u1, u2]
 }
 
+pred contentOwnedbyOnlyOneUser[c: Content] {
+	one owns.c
+}
+
 pred contentNotOwnByTwoUser[u1,u2: User, c: Content] {
 	not (u1 != u2 and c in u1.owns and c in u2.owns)
 }
@@ -27,6 +31,7 @@ pred commentNotCyclic[cm: Comment]{
 }
 
 pred contentInvariant[c: Content] {
+	contentOwnedbyOnlyOneUser[c] and
 	all u1,u2:User | contentNotOwnByTwoUser[u1,u2,c] and
 	commentNotCyclic[c]
 }
@@ -36,7 +41,7 @@ pred wallHaveOneUser[w: Wall] {
 }
 
 pred wallInvairant[w: Wall] {
-	wallHaveUser[w]
+	wallHaveOneUser[w]
 }
 
 pred niceBookInvariants {
