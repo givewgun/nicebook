@@ -31,7 +31,16 @@ pred contentInvariant[c: Content] {
 	commentNotCyclic[c]
 }
 
+pred wallHaveOneUser[w: Wall] {
+	one has.w
+}
+
+pred wallInvairant[w: Wall] {
+	wallHaveUser[w]
+}
+
 pred niceBookInvariants {
 	all u: User | userInvariants[u] and
-	all c: Content | contentInvariant[c]
+	all c: Content | contentInvariant[c] and
+	all w: Wall | wallInvairant[w]
 }
