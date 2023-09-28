@@ -30,10 +30,15 @@ pred commentNotCyclic[cm: Comment]{
 	cm not in cm.^attchedTo
 }
 
+pred commentNotAddedToOtherUserUnpublisedContent[cm: Comment]{
+	no u1,u2: User, c: Content | u1 != u2 and (not c in PublishedContent) and c in cm.attchedTo
+}
+
 pred contentInvariant[c: Content] {
 	contentOwnedbyOnlyOneUser[c] and
-	all u1,u2:User | contentNotOwnByTwoUser[u1,u2,c] and
-	commentNotCyclic[c]
+	all u1,u2: User | contentNotOwnByTwoUser[u1,u2,c] and
+	commentNotCyclic[c] and
+	commentNotAddedToOtherUserUnpublisedContent[c]
 }
 
 pred wallHaveOneUser[w: Wall] {
