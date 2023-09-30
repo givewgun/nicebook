@@ -4,8 +4,9 @@ sig User {
 	has: one Wall,
 }
 
-sig Wall {}
-
+sig Wall {
+	has: some PublishedContent
+}
 
 abstract sig Content {
 	viewPrivacy: one PrivacySetting,
@@ -21,6 +22,10 @@ sig Comment extends Content {
 }
 
 
+
+sig NiceBook {
+	// relations 
+}
 
 sig PublishedContent in Content {}
 
