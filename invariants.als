@@ -41,12 +41,17 @@ pred commentMustBeOnAContentWall[c: Content]{
 	all cm: Comment | cm in (contains.c).contains
 }
 
+pred commentMustBeOnOneWall[cm: Comment]{
+	one contains.cm
+}
+
 pred contentInvariant[c: Content] {
 	contentOwnedbyOnlyOneUser[c] and
 	all u1,u2: User | contentNotOwnByTwoUser[u1,u2,c] and
 	commentNotCyclic[c] and
 	commentNotAddedToOtherUserUnpublisedContent[c] and 
-	commentMustBeOnAContentWall[c]
+	commentMustBeOnAContentWall[c] and
+	all cm: Comment | commentMustBeOnOneWall[cm]
 }
 
 pred wallHaveOneUser[w: Wall] {
