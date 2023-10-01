@@ -19,7 +19,7 @@ sig Photo extends Content {
 }
 
 sig Comment extends Content {
-	attchedTo: one Content,
+	attachedTo: one Content,
 }
 
 abstract sig PrivacySetting {}

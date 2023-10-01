@@ -27,12 +27,12 @@ pred contentNotOwnByTwoUser[u1,u2: User, c: Content] {
 }
 
 pred commentNotCyclic[cm: Comment]{
-	cm not in cm.^attchedTo
+	cm not in cm.^attachedTo
 }
 
 pred commentNotAddedToOtherUserUnpublisedContent[c: Content]{
 	//comment must be attached to published content on a wall if user is different 
-	no u1,u2: User, cm: Comment | (c in cm.attchedTo) and (u1 != u2) and (cm in u1.owns) and (c not in u2.has.contains) 
+	no u1,u2: User, cm: Comment | (c in cm.attachedTo) and (u1 != u2) and (cm in u1.owns) and (c not in u2.has.contains) 
 
 }
 
