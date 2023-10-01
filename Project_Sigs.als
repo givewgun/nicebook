@@ -4,7 +4,9 @@ sig User {
 	has: one Wall,
 }
 
-sig Wall {}
+sig Wall {
+	contains: some Content
+}
 
 
 abstract sig Content {
@@ -19,10 +21,6 @@ sig Photo extends Content {
 sig Comment extends Content {
 	attchedTo: one Content,
 }
-
-
-
-sig PublishedContent in Content {}
 
 abstract sig PrivacySetting {}
 

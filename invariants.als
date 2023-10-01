@@ -30,15 +30,23 @@ pred commentNotCyclic[cm: Comment]{
 	cm not in cm.^attchedTo
 }
 
-pred commentNotAddedToOtherUserUnpublisedContent[cm: Comment]{
-	no u1,u2: User, c: Content | u1 != u2 and (not c in PublishedContent) and c in cm.attchedTo
+pred commentNotAddedToOtherUserUnpublisedContent[c: Content]{
+	//comment must be attached to published content on a wall if user is different 
+	no u1,u2: User, cm: Comment | (c in cm.attchedTo) and (u1 != u2) and (cm in u1.owns) and (c not in u2.has.contains) 
+
+}
+
+pred commentMustBeOnAContentWall[c: Content]{
+	//comment must be on the same wall as the content
+	all cm: Comment | cm in (contains.c).contains
 }
 
 pred contentInvariant[c: Content] {
 	contentOwnedbyOnlyOneUser[c] and
 	all u1,u2: User | contentNotOwnByTwoUser[u1,u2,c] and
 	commentNotCyclic[c] and
-	commentNotAddedToOtherUserUnpublisedContent[c]
+	commentNotAddedToOtherUserUnpublisedContent[c] and 
+	commentMustBeOnAContentWall[c]
 }
 
 pred wallHaveOneUser[w: Wall] {
