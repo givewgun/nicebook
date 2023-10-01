@@ -1,3 +1,7 @@
+sig Nicebook {
+	users: some User
+}
+
 sig User {
 	friends: set User,
 	owns: some Content,

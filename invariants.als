@@ -1,69 +1,69 @@
 open Project_Sigs
 
-pred notFriendsWithSelf[u: User] {
-//    	u not in u.friends
-	no u: User | u in u.friends
+pred userMustBeInAState {
+	User = Nicebook.users
+}
+
+pred notFriendsWithSelf[s: Nicebook] {
+	all u: User | u not in u.friends
 }
 
 
-pred symmetricFriendship[u1, u2: User] {
-    u1 in u2.friends iff u2 in u1.friends
+pred symmetricFriendship[s: Nicebook] {
+	all u1,u2: User | u1 in u2.friends iff u2 in u1.friends
 }
 
 // user invariants
-pred userInvariants[u: User] {
-	all u: User | notFriendsWithSelf[u] 
-	all u1, u2 : User | symmetricFriendship[u1, u2]
+pred userInvariants[s :Nicebook] {
+	userMustBeInAState and
+	notFriendsWithSelf[s] and 
+	symmetricFriendship[s] 
 //	all u1, u2: User | uniquePosts[u1, u2]
 	//all u1, u2: User | cannotViewOthersPrivatePosts[u1, u2]
 }
 
-pred contentOwnedbyOnlyOneUser[c: Content] {
-	one owns.c
+pred contentOwnedbyOnlyOneUser[s: Nicebook] {
+	all c: s.users.owns | one (owns.c & s.users)
 }
 
-pred contentNotOwnByTwoUser[u1,u2: User, c: Content] {
-	not (u1 != u2 and c in u1.owns and c in u2.owns)
+pred commentNotCyclic[s: Nicebook]{
+	all cm: Comment | cm in Comment implies (cm not in cm.^attachedTo)
+	
 }
 
-pred commentNotCyclic[cm: Comment]{
-	cm not in cm.^attachedTo
-}
-
-pred commentNotAddedToOtherUserUnpublisedContent[c: Content]{
+pred commentNotAddedToOtherUserUnpublisedContent[s: Nicebook]{
 	//comment must be attached to published content on a wall if user is different 
-	no u1,u2: User, cm: Comment | (c in cm.attachedTo) and (u1 != u2) and (cm in u1.owns) and (c not in u2.has.contains) 
+	no u1,u2: User, c: Content, cm: Comment | (c in cm.attachedTo) and (u1 != u2) and (cm in u1.owns) and (c not in u2.has.contains) 
 
 }
 
-pred commentMustBeOnAContentWall[c: Content]{
+pred commentMustBeOnAContentWall[s: Nicebook]{
 	//comment must be on the same wall as the content
-	all cm: Comment | cm in (contains.c).contains
+	all c: Content, cm: Comment | (c not in Comment) implies cm in (contains.c).contains
 }
 
-pred commentMustBeOnOneWall[cm: Comment]{
-	one contains.cm
+pred commentMustBeOnOneWall[s: Nicebook]{
+	all cm: Comment | one contains.cm
 }
 
-pred contentInvariant[c: Content] {
-	contentOwnedbyOnlyOneUser[c] and
-	all u1,u2: User | contentNotOwnByTwoUser[u1,u2,c] and
-	commentNotCyclic[c] and
-	commentNotAddedToOtherUserUnpublisedContent[c] and 
-	commentMustBeOnAContentWall[c] and
-	all cm: Comment | commentMustBeOnOneWall[cm]
+pred contentInvariant[s: Nicebook] {
+	contentOwnedbyOnlyOneUser[s] and
+	commentNotCyclic[s] and
+	commentNotAddedToOtherUserUnpublisedContent[s] and 
+	commentMustBeOnAContentWall[s] and
+	commentMustBeOnOneWall[s]
 }
 
-pred wallHaveOneUser[w: Wall] {
-	one has.w
+pred wallHaveOneUser[s: Nicebook] {
+	all w: s.users.has | one (has.w &  s.users)
 }
 
-pred wallInvairant[w: Wall] {
-	wallHaveOneUser[w]
+pred wallInvairant[s: Nicebook] {
+	wallHaveOneUser[s]
 }
 
-pred niceBookInvariants {
-	all u: User | userInvariants[u] and
-	all c: Content | contentInvariant[c] and
-	all w: Wall | wallInvairant[w]
+pred niceBookInvariants[s: Nicebook] {
+	userInvariants[s] and
+	contentInvariant[s] and
+	wallInvairant[s]
 }
