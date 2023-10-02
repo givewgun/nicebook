@@ -98,3 +98,50 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	}
 
 }
+
+
+pred share[u1, u2: User, p: Photo, w1, w2:Wall] {
+    // pre condition
+    // the user owns the content
+    p in u1.owns
+    // the privacy settings allow the user2 to share the post
+    (u2 in u1.friends and p.sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
+    or (u2 in u1.friends.friends and (p.viewPrivacy=Everyone or p.viewPrivacy=FriendsOfFriends)
+    and  (p.sharePrivacy=Everyone  or p.sharePrivacy=FriendsOfFriends)) 
+    // post condition
+    // the post should now show up on the users wall
+    w2 in u2.has
+    w2.contains = w1.contains + p
+}
+
+
+pred share[s1, s2: Nicebook, u1,u2:User,  p:Photo]{
+	//pre-condition
+	//owner must be in the old state
+	u1 in s1.users
+	//photo must be owned by u1 (owner)
+	 p in u1.owns
+	//u2 is different from owner
+	u2 != u1
+	//user should own that content
+	(u2 in (u1).friends and p.sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
+	or (u2 in (u1).friends.friends and (p.viewPrivacy=Everyone or p.viewPrivacy=FriendsOfFriends)
+	and  (p.sharePrivacy=Everyone  or p.sharePrivacy=FriendsOfFriends))
+	//post-condition
+	some u3: User{
+		some w3:Wall{
+			//preconditon for new user
+			u2 != u3
+			//pre condition for new wall
+			w3 != u2.has
+			//add photo to new wall
+			w3.contains = u2.has.contains + p
+			u3.has = w3
+			//frame condition
+			u3.friends = u2.friends
+			u3.owns = u2.owns
+		}
+		s2.users = s1.users - u2 + u3
+	}
+
+}
