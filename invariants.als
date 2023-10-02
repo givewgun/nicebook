@@ -4,6 +4,10 @@ pred userMustBeInAState {
 	User = Nicebook.users
 }
 
+pred userCannotBeFriendsWithOtherInDifferentState {
+	all u1,u2: User | users.u1 != users.u2 implies (u2 not in u1.friends and u1 not in u2.friends)
+}
+
 pred notFriendsWithSelf[s: Nicebook] {
 	all u: User | u not in u.friends
 }
@@ -15,6 +19,7 @@ pred symmetricFriendship[s: Nicebook] {
 
 // user invariants
 pred userInvariants[s :Nicebook] {
+//	userCannotBeFriendsWithOtherInDifferentState and 
 	userMustBeInAState and
 	notFriendsWithSelf[s] and 
 	symmetricFriendship[s] 
@@ -23,7 +28,7 @@ pred userInvariants[s :Nicebook] {
 }
 
 pred contentOwnedbyOnlyOneUser[s: Nicebook] {
-	all c: s.users.owns | one (owns.c & s.users)
+	all c: s.users.owns |  #(owns.c & s.users) = 1
 }
 
 pred commentNotCyclic[s: Nicebook]{
@@ -61,7 +66,7 @@ pred contentInvariant[s: Nicebook] {
 }
 
 pred wallHaveOneUser[s: Nicebook] {
-	all w: s.users.has | one (has.w &  s.users)
+	all w: s.users.has |  #(has.w &  s.users) = 1
 }
 
 pred wallInvairant[s: Nicebook] {
