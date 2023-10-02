@@ -38,3 +38,28 @@ pred removePhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 }
 
 
+pred publish[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
+	//pre condition 
+	//photo must be owned by user (u1)
+	p in u1.owns
+	//photo must not already be on user (u1) wall
+	p not in u1.has.contains
+	
+	// Ensure w1 and w2 are distinct
+	w1 != w2
+	
+	//post condition
+
+	//add photo from owner wall
+	w2.contains = w1.contains + p 
+	//new user state
+	u2.owns = u1.owns
+	u2.friends = u1.friends 
+	//Ensure the relationship between User and Wall
+	u1.has = w1
+	u2.has = w2
+
+	//add new user to new state
+	s2.users = s1.users + u2 - u1
+
+}
