@@ -56,7 +56,7 @@ pred contentInvariant[s: Nicebook] {
 	contentOwnedbyOnlyOneUser[s] and
 	commentNotCyclic[s] and
 	commentNotAddedToOtherUserUnpublisedContent[s] and 
-	commentMustBeOnAContentWall[s] and
+	commentMustBeOnAContentOwnerWall[s] and
 	commentMustBeOnOneWall[s]
 }
 
