@@ -33,13 +33,19 @@ pred commentNotCyclic[s: Nicebook]{
 
 pred commentNotAddedToOtherUserUnpublisedContent[s: Nicebook]{
 	//comment must be attached to published content on a wall if user is different 
-	no u1,u2: User, c: Content, cm: Comment | (c in cm.attachedTo) and (u1 != u2) and (cm in u1.owns) and (c not in u2.has.contains) 
+	no u1,u2: User, c: Content, cm: Comment | 
+		u2 != u1 and 
+		c in u1.owns and
+		c not in u1.has.contains and
+		cm in u2.owns and 
+		c in cm.attachedTo
 
 }
 
-pred commentMustBeOnAContentWall[s: Nicebook]{
-	//comment must be on the same wall as the content
-	all c: Content, cm: Comment | (c not in Comment) implies cm in (contains.c).contains
+pred commentMustBeOnAContentOwnerWall[s: Nicebook]{
+	//comment must be on the same wall as the content owner wall
+	all c, cm: Content | (c not in Comment) implies cm in (owns.c).has.contains
+
 }
 
 pred commentMustBeOnOneWall[s: Nicebook]{
