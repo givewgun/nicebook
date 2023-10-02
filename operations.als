@@ -12,27 +12,29 @@ pred addPhoto[s1, s2: Nicebook, u1: User, p: Photo] {
 		u2.has = u1.has
 		s2.users = s1.users + u2 -u1
 	}
-
-
 }
 
-pred removePhoto[s1, s2: Nicebook, u1: User, p: Photo] {
+pred removePhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 	//pre condition 
-	//photo must be owned by user
+	//photo must be owned by user (u1)
 	p in u1.owns
+	
+	// Ensure w1 and w2 are distinct
+	w1 != w2
+	
 	//post condition
 	//new user state
-
-	some u2: User {
-		//remove photo from user owns content
-		u2.owns = u1.owns - p
-		//remove photo from owner wall
-		u2.has.contains = u1.has.contains - p
-		s2.users = s1.users + u2 -u1
-		u2.has.contains = u1.has.contains - p
-
-		u2.friends = u1. friends 
-		u2.has = u1.has
-	}
+	u2.owns = u1.owns - p
+	u2.friends = u1.friends 
+	
+	//Ensure the relationship between User and Wall
+	u1.has = w1
+	u2.has = w2
+	
+	//remove photo from owner wall
+	w2.contains = w1.contains - p 
+	
+	s2.users = s1.users + u2 - u1
 }
+
 
