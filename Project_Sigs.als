@@ -1,12 +1,13 @@
 sig Nicebook {
-	Friendship: User -> User,
-	UserHasWall: User -> one Wall,
-	UserOwnsContent: User -> some Content,
-	WallContainsContent: Wall -> Content,
-	CommentPrivacy: Content -> one PrivacySetting,
-	ViewPrivacy: Content -> one PrivacySetting,
-	CommentAttachedToContent: Comment -> one Content,
-	SharePrivacy: Photo -> one PrivacySetting
+	users : some User
+	// Friendship: User -> User,
+	// UserHasWall: User -> one Wall,
+	// UserOwnsContent: User -> some Content,
+	// WallContainsContent: Wall -> Content,
+	// CommentPrivacy: Content -> one PrivacySetting,
+	// ViewPrivacy: Content -> one PrivacySetting,
+	// CommentAttachedToContent: Comment -> one Content,
+	// SharePrivacy: Photo -> one PrivacySetting
 }
 
 sig User {
