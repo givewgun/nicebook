@@ -30,9 +30,16 @@ pred removePhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 	//Ensure the relationship between User and Wall
 	u1.has = w1
 	u2.has = w2
+
+	all u: User | u in s2.users implies ^attachedTo.p not in u.owns
+
+	// all w: Wall | w in s2.users.has implies ^attachedTo.p not in w.contains
+	
 	
 	//remove photo from owner wall
 	w2.contains = w1.contains - p 
+
+	^attachedTo.p not in w2.contains
 	
 	s2.users = s1.users + u2 - u1
 }
