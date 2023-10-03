@@ -8,10 +8,10 @@ pred userCannotBeFriendsWithOtherInDifferentState {
 	all u1,u2: User | users.u1 != users.u2 implies (u2 not in u1.friends and u1 not in u2.friends)
 }
 
+
 pred notFriendsWithSelf[s: Nicebook] {
 	all u: User | u not in u.friends
 }
-
 
 pred symmetricFriendship[s: Nicebook] {
 	all u1,u2: User | u1 in u2.friends iff u2 in u1.friends
@@ -33,7 +33,6 @@ pred contentOwnedbyOnlyOneUser[s: Nicebook] {
 
 pred commentNotCyclic[s: Nicebook]{
 	all cm: Comment | cm in Comment implies (cm not in cm.^attachedTo)
-	
 }
 
 pred commentNotAddedToOtherUserUnpublisedContent[s: Nicebook]{
@@ -71,6 +70,10 @@ pred wallHaveOneUser[s: Nicebook] {
 
 pred wallInvairant[s: Nicebook] {
 	wallHaveOneUser[s]
+}
+
+pred wallOwnedByOnlyOneUserAcrossAllStates {
+	all w: Wall | one u: User | w in u.has
 }
 
 pred niceBookInvariants[s: Nicebook] {
