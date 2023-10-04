@@ -3,6 +3,7 @@ open Project_Sigs
 
 pred addPhoto[s1, s2: Nicebook, u1: User, p: Photo] {
 	//pre condition 
+	p not in u1.owns
 	//true
 	//post condition
 	//add photo to user owns content
@@ -11,6 +12,7 @@ pred addPhoto[s1, s2: Nicebook, u1: User, p: Photo] {
 		u2.friends = u1. friends 
 		u2.has = u1.has
 		s2.users = s1.users + u2 -u1
+		s2.users.owns = s1.users.owns + p
 	}
 }
 
@@ -18,31 +20,51 @@ pred removePhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 	//pre condition 
 	//photo must be owned by user (u1)
 	p in u1.owns
-	
+
 	// Ensure w1 and w2 are distinct
 	w1 != w2
 	
 	//post condition
 	//new user state
-	u2.owns = u1.owns - p
+	u2.owns = u1.owns - p - ^attachedTo.p 
 	u2.friends = u1.friends 
 	
 	//Ensure the relationship between User and Wall
 	u1.has = w1
 	u2.has = w2
 
-	all u: User | u in s2.users implies ^attachedTo.p not in u.owns
+	// all u: User | u in s2.users implies ^attachedTo.p not in u.owns
 
 	// all w: Wall | w in s2.users.has implies ^attachedTo.p not in w.contains
 	
-	
-	//remove photo from owner wall
-	w2.contains = w1.contains - p 
+	//remove photo and all attached content from owner wall
+	w2.contains = w1.contains - p - ^attachedTo.p 
 
+	//ensure comment of u1=2
 	^attachedTo.p not in w2.contains
 	
 	s2.users = s1.users + u2 - u1
+
+	//condition for user with comment attached to this
+	all u3: owns.(^attachedTo.p) - u1 | removeCommentIfAttachTo[s1,s2, u3, p]
 }
+
+
+pred removeCommentIfAttachTo[s1, s2: Nicebook, u3: User, p: Photo]{
+	//precondition 
+	//u1 in old state
+	u3 in s1.users
+	//photo in old state
+	p in s1.users.owns
+
+	some u4: User {
+		u4.owns = u3.owns - ^attachedTo.p
+		u4.has = u3.has
+
+		s2.users = s1.users - u3 + u4
+	}
+}
+
 
 
 pred publish[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {

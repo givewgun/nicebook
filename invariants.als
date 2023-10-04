@@ -5,7 +5,7 @@ pred userMustBeInAState {
 }
 
 pred userCannotBeFriendsWithOtherInDifferentState {
-	all u1,u2: User | users.u1 != users.u2 implies (u2 not in u1.friends and u1 not in u2.friends)
+	all u1,u2: User | #(users.u1 & users.u2) = 0 implies (u2 not in u1.friends and u1 not in u2.friends)
 }
 
 
@@ -19,7 +19,7 @@ pred symmetricFriendship[s: Nicebook] {
 
 // user invariants
 pred userInvariants[s :Nicebook] {
-//	userCannotBeFriendsWithOtherInDifferentState and 
+	userCannotBeFriendsWithOtherInDifferentState and 
 	userMustBeInAState and
 	notFriendsWithSelf[s] and 
 	symmetricFriendship[s] 
@@ -27,7 +27,11 @@ pred userInvariants[s :Nicebook] {
 	//all u1, u2: User | cannotViewOthersPrivatePosts[u1, u2]
 }
 
-pred contentOwnedbyOnlyOneUser[s: Nicebook] {
+pred contentOwnedbyAtLeastOnceUserAcrossAllState[s: Nicebook] {
+	all c: Content |  #(owns.c) > 0
+}
+
+pred contentOwnedbyOnlyOneUserInAState[s: Nicebook] {
 	all c: s.users.owns |  #(owns.c & s.users) = 1
 }
 
@@ -35,10 +39,9 @@ pred commentNotCyclic[s: Nicebook]{
 	all cm: Comment | cm in Comment implies (cm not in cm.^attachedTo)
 }
 
-pred commentNotAddedToOtherUserUnpublisedContent[s: Nicebook]{
+pred commentNotAddedToUnpublisedContent[s: Nicebook]{
 	//comment must be attached to published content on a wall if user is different 
 	no u1,u2: User, c: Content, cm: Comment | 
-		u2 != u1 and 
 		c in u1.owns and
 		c not in u1.has.contains and
 		cm in u2.owns and 
@@ -56,25 +59,38 @@ pred commentMustBeOnOneWall[s: Nicebook]{
 	all cm: Comment | one contains.cm
 }
 
-pred contentInvariant[s: Nicebook] {
-	contentOwnedbyOnlyOneUser[s] and
-	commentNotCyclic[s] and
-	commentNotAddedToOtherUserUnpublisedContent[s] and 
-	commentMustBeOnAContentOwnerWall[s] and
-	commentMustBeOnOneWall[s]
+pred commentMustBeAttachedToSameStateAsPhoto[s: Nicebook, p: Photo]{
+	all cm: Comment | cm in ^attachedTo.p implies #(users.(owns.(cm.attachedTo)) & (users.owns.cm)) > 0
 }
 
-pred wallHaveOneUser[s: Nicebook] {
+pred commentMustBeAttachedToOnePhoto[s: Nicebook]{
+	all cm: Comment | #(cm.^attachedTo & Photo) = 1
+}
+
+pred contentInvariant[s: Nicebook] {
+	contentOwnedbyOnlyOneUserInAState[s] and
+	contentOwnedbyAtLeastOnceUserAcrossAllState[s] and
+	all p: Photo | commentMustBeAttachedToSameStateAsPhoto[s,p] and 
+	commentNotCyclic[s] and
+	commentNotAddedToUnpublisedContent[s] and 
+	commentMustBeOnAContentOwnerWall[s] and
+	commentMustBeOnOneWall[s] and 
+	commentMustBeAttachedToOnePhoto[s]
+}
+
+pred wallHaveOneUserInAState[s: Nicebook] {
 	all w: s.users.has |  #(has.w &  s.users) = 1
 }
 
 pred wallInvairant[s: Nicebook] {
-	wallHaveOneUser[s]
+	wallHaveOneUserInAState[s] and 
+	wallOwnedbyAtLeastOneUserAcrossAllState[s]
 }
 
-pred wallOwnedByOnlyOneUserAcrossAllStates {
-	all w: Wall | one u: User | w in u.has
+pred wallOwnedbyAtLeastOneUserAcrossAllState[s: Nicebook] {
+	all w: Wall |  #(has.w) > 0
 }
+
 
 pred niceBookInvariants[s: Nicebook] {
 	userInvariants[s] and
