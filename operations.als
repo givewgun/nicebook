@@ -3,7 +3,8 @@ open Project_Sigs
 
 pred addPhoto[s1, s2: Nicebook, u1: User, p: Photo] {
 	//pre condition 
-	p not in u1.owns
+	//photo not owns by any one in old state
+	p not in s1.users.owns
 	//true
 	//post condition
 	//add photo to user owns content
