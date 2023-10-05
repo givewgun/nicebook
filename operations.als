@@ -68,29 +68,32 @@ pred removeCommentIfAttachTo[s1, s2: Nicebook, u3: User, p: Photo]{
 
 
 
-pred publish[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
+pred publish[s1, s2: Nicebook, u1: User, p: Photo] {
 	//pre condition 
 	//photo must be owned by user (u1)
 	p in u1.owns
 	//photo must not already be on user (u1) wall
 	p not in u1.has.contains
-	
-	// Ensure w1 and w2 are distinct
-	w1 != w2
-	
+
 	//post condition
-
-	//add photo from owner wall
-	w2.contains = w1.contains + p 
-	//new user state
-	u2.owns = u1.owns
-	u2.friends = u1.friends 
-	//Ensure the relationship between User and Wall
-	u1.has = w1
-	u2.has = w2
-
-	//add new user to new state
-	s2.users = s1.users + u2 - u1
+	some u2: User {
+		u2 != u1
+		some w2: Wall {
+			w2 not in u1.has
+			//add photo from owner wall
+			w2.contains = u1.has.contains + p 
+			//set new wall to new user and ensure only new user owns that wall
+			u2.has = w2
+			has.w2 = u2
+		}
+		//frame condition for user owns content
+		u2.owns = u1.owns
+		//frame condition for user friends
+		u2.friends = u1.friends 
+		
+		//update new state with new user
+		s2.users = s1.users + u2 - u1
+	}
 
 }
 
