@@ -1,5 +1,5 @@
 open Project_Sigs
-
+open invariants
 
 pred addPhoto[s1, s2: Nicebook, u1: User, p: Photo] {
 	//pre condition 
@@ -105,10 +105,14 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	u3 in s1.users
 	//comment must not exist in the old state
 	c not in s1.users.owns
-	//comment must not be attached to the content
-	c not in ^attachedTo.c1
+	// //comment must not be attached to the content
+	// c not in ^attachedTo.c1
 	// the comment and the peice of content shouldn't be the same 
 	c != c1
+	//content must be owned in state 1
+	//comment must not be cyclic
+	(c not in c.^attachedTo) and (c not in ^attachedTo.c)
+	c1 in s1.users.owns
 	//user should own that content
 	(u3 in (u1).friends and c1.commentPrivacy != OnlyMe and c1.viewPrivacy!=OnlyMe)
 	or (u3 in (u1).friends.friends and (c1.viewPrivacy=Everyone or c1.viewPrivacy=FriendsOfFriends)
@@ -117,10 +121,11 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 
 	// attach the comment to the photo
 	c.attachedTo = c1
+	#(c.attachedTo) = 1
 	some u2, u4: User{
 		some w2:Wall{
 			//comment must not be in the old state of the commenter
-                      c not in u3.owns 
+            c not in u3.owns 
 			//new commenter state (u4)
 			//add comment to new commenter user state
 			u4.owns=u3.owns+c
@@ -138,7 +143,9 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 			u2.friends = u1.friends
 			u2.owns = u1.owns
 		}
+		//update new state with new users
 		s2.users = s1.users - u1 + u2 - u3 + u4
+		commentNotCyclic[s2]
 	}
 
 }

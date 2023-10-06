@@ -49,7 +49,7 @@ check AssertionAddPhoto for 5 but exactly 2 Nicebook
  		niceBookInvariants[s1] and 
  		addComment[s1, s2, c1,c,u1,u3]
  		and niceBookInvariants[s2]
- } for 5 but exactly 2 Nicebook, exactly 3 User, exactly 2 Comment
+ } for 5 but exactly 2 Nicebook, exactly 2 Comment
 
  assert AssertionAddComment {
  		all s1,s2: Nicebook,u1,u3: User, c1:Content, c:Comment | 
