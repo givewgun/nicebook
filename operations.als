@@ -51,15 +51,15 @@ pred removePhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 }
 
 
-pred removeCommentIfAttachTo[s1, s2: Nicebook, u3: User, p: Photo]{
+pred removeCommentIfAttachTo[s1, s2: Nicebook, u3: User, c: Content]{
 	//precondition 
 	//u1 in old state
 	u3 in s1.users
 	//photo in old state
-	p in s1.users.owns
+	c in s1.users.owns
 
 	some u4: User {
-		u4.owns = u3.owns - ^attachedTo.p
+		u4.owns = u3.owns - ^attachedTo.c
 		u4.has = u3.has
 
 		s2.users = s1.users - u3 + u4
@@ -112,8 +112,10 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	//content must be owned in state 1
 	//comment must not be cyclic
 	(c not in c.^attachedTo) and (c not in ^attachedTo.c)
-	c1 in s1.users.owns
 	//user should own that content
+	c1 in s1.users.owns
+	//comment must not be cyclic
+	(c not in c.^attachedTo) and (c not in ^attachedTo.c)
 	(u3 in (u1).friends and c1.commentPrivacy != OnlyMe and c1.viewPrivacy!=OnlyMe)
 	or (u3 in (u1).friends.friends and (c1.viewPrivacy=Everyone or c1.viewPrivacy=FriendsOfFriends)
 	and  (c1.commentPrivacy=Everyone  or c1.commentPrivacy=FriendsOfFriends))
@@ -145,7 +147,6 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 		}
 		//update new state with new users
 		s2.users = s1.users - u1 + u2 - u3 + u4
-		commentNotCyclic[s2]
 	}
 
 }
@@ -197,4 +198,90 @@ pred share[s1, s2: Nicebook, u1,u2:User,  p:Photo]{
 		s2.users = s1.users - u2 + u3
 	}
 
+}
+
+
+pred unpublishPhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
+	//pre condition 
+	//photo must be owned by user (u1)
+	p in u1.owns
+	//new user must still owns the photo
+	p in u2.owns
+
+	//
+	//^attachedTo.p in w1.contains
+
+
+	p in u1.has.contains
+	//no comment in s2 should be attached to p
+	//all c: Comment  | c in s2.users.owns implies c not in ^attachedTo.p
+
+	//user must be in old state
+	u1 in s1.users
+	u2 not in s1.users
+
+	// Ensure w1 and w2 are distinct
+	w1 != w2
+	
+	//post condition
+	//new user state
+	u2.owns = u1.owns - ^attachedTo.p 
+	u2.friends = u1.friends 
+	
+	//Ensure the relationship between User and Wall
+	u1.has = w1
+	has.w1 = u1
+	u2.has = w2
+	has.w2 = u2
+	
+	//remove photo and all attached content from owner wall
+	w2.contains = w1.contains - p - ^attachedTo.p 
+
+	//ensure comment of u1=2
+	^attachedTo.p not in w2.contains
+	
+	s2.users = s1.users + u2 - u1
+
+	//condition for user with comment attached to this
+	all u3: owns.(^attachedTo.p) - u1 | removeCommentIfAttachTo[s1,s2, u3, p]
+}
+
+
+pred unpublishComment[s1, s2: Nicebook, u1, u2: User, c: Comment, w1, w2: Wall] {
+	//pre condition 
+	//photo must be owned by user (u1)
+	c in u1.owns
+
+	//comment must not be cyclic in s1
+	commentNotCyclic[s1]
+	//comment must not be cyclic in s1
+	commentNotCyclic[s2]
+
+
+	//user must be in old state
+	u1 in s1.users
+	u2 not in s1.users
+
+	// Ensure w1 and w2 are distinct
+	w1 != w2
+	
+	//post condition
+	//new user state
+	u2.owns = u1.owns - c - ^attachedTo.c 
+	u2.friends = u1.friends 
+	
+	//Ensure the relationship between User and Wall
+	u1.has = w1
+	u2.has = w2
+	
+	//remove photo and all attached content from owner wall
+	w2.contains = w1.contains - c - ^attachedTo.c 
+
+	//ensure comment of u1=2
+	^attachedTo.c not in w2.contains
+	
+	s2.users = s1.users + u2 - u1
+
+	//condition for user with comment attached to this
+	all u3: owns.(^attachedTo.c) - u1 | removeCommentIfAttachTo[s1,s2, u3,c]
 }
