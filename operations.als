@@ -107,11 +107,16 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	c not in s1.users.owns
 	//comment must not be attached to the content
 	c not in ^attachedTo.c1
+	// the comment and the peice of content shouldn't be the same 
+	c != c1
 	//user should own that content
 	(u3 in (u1).friends and c1.commentPrivacy != OnlyMe and c1.viewPrivacy!=OnlyMe)
 	or (u3 in (u1).friends.friends and (c1.viewPrivacy=Everyone or c1.viewPrivacy=FriendsOfFriends)
 	and  (c1.commentPrivacy=Everyone  or c1.commentPrivacy=FriendsOfFriends))
 	//post-condition
+
+	// attach the comment to the photo
+	c.attachedTo = c1
 	some u2, u4: User{
 		some w2:Wall{
 			//comment must not be in the old state of the commenter
@@ -123,6 +128,7 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 			u4.friends = u3.friends
 			u4.has = u3.has
 
+			
 			//new content owner state (u2)
 			//add new wall state for original content owner
 			w2.contains = (u1.has).contains+c

@@ -36,7 +36,7 @@ pred contentOwnedbyOnlyOneUserInAState[s: Nicebook] {
 }
 
 pred commentNotCyclic[s: Nicebook]{
-	all cm: Comment | cm in Comment implies (cm not in cm.^attachedTo)
+	all cm: Comment | (cm not in cm.^attachedTo) and (cm not in ^attachedTo.cm)
 }
 
 pred commentNotAddedToUnpublisedContent[s: Nicebook]{
