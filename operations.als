@@ -184,10 +184,12 @@ pred share[s1, s2: Nicebook, u1,u2:User,  p:Photo]{
 			//preconditon for new user
 			u2 != u3
 			//pre condition for new wall
-			w3 != u2.has
+			//new wall noi own by old user
+			w3 not in u2.has + u1.has
 			//add photo to new wall
 			w3.contains = u2.has.contains + p
 			u3.has = w3
+			has.w3 = u3
 			//frame condition
 			u3.friends = u2.friends
 			u3.owns = u2.owns

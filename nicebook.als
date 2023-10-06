@@ -61,13 +61,13 @@ check AssertionAddPhoto for 5 but exactly 2 Nicebook
  check AssertionAddComment for 5 but exactly 2 Nicebook
 
 
-//run GenerateShareValidInstance {
-//	some s1,s2: Nicebook,u1,u2: User, p:Photo | 
-//		s1 != s2 and
-//		niceBookInvariants[s1] and 
-//		share[s1, s2, u1,u2,p]
-//		and niceBookInvariants[s2]
-//} for 7 but exactly 2 Nicebook, exactly 5 User
+run GenerateShareValidInstance {
+	some s1,s2: Nicebook,u1,u2: User, p:Photo | 
+		s1 != s2 and
+		niceBookInvariants[s1] and 
+		share[s1, s2, u1,u2,p]
+		and niceBookInvariants[s2]
+} for 7 but exactly 2 Nicebook, exactly 5 User
 
  assert AssertionShare{
 		all s1,s2: Nicebook,u1,u2: User, p:Photo | 
