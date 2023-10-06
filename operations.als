@@ -101,6 +101,12 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	//pre-condition
 	//owner must be in the old state
 	u1 in s1.users
+	//commenter must be in the old state
+	u3 in s1.users
+	//comment must not exist in the old state
+	c not in s1.users.owns
+	//comment must not be attached to the content
+	c not in ^attachedTo.c1
 	//user should own that content
 	(u3 in (u1).friends and c1.commentPrivacy != OnlyMe and c1.viewPrivacy!=OnlyMe)
 	or (u3 in (u1).friends.friends and (c1.viewPrivacy=Everyone or c1.viewPrivacy=FriendsOfFriends)
@@ -108,8 +114,6 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	//post-condition
 	some u2, u4: User{
 		some w2:Wall{
-			//preconditon for new user
-			u2 != u4
 			//comment must not be in the old state of the commenter
                       c not in u3.owns 
 			//new commenter state (u4)
@@ -123,6 +127,7 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 			//add new wall state for original content owner
 			w2.contains = (u1.has).contains+c
 			u2.has = w2
+			has.w2 = u2
 			//frame condtion
 			u2.friends = u1.friends
 			u2.owns = u1.owns

@@ -28,5 +28,5 @@ sig Comment extends Content {
 
 abstract sig PrivacySetting {}
 
-sig Everyone, OnlyMe, Friends,  FriendsOfFriends extends PrivacySetting {}
+one sig Everyone, OnlyMe, Friends,  FriendsOfFriends extends PrivacySetting {}
 
