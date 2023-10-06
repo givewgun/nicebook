@@ -109,6 +109,7 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	// c not in ^attachedTo.c1
 	// the comment and the peice of content shouldn't be the same 
 	c != c1
+
 	//content must be owned in state 1
 	//comment must not be cyclic
 	(c not in c.^attachedTo) and (c not in ^attachedTo.c)
@@ -120,34 +121,51 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	or (u3 in (u1).friends.friends and (c1.viewPrivacy=Everyone or c1.viewPrivacy=FriendsOfFriends)
 	and  (c1.commentPrivacy=Everyone  or c1.commentPrivacy=FriendsOfFriends))
 	//post-condition
-
-	// attach the comment to the photo
+	
 	c.attachedTo = c1
 	#(c.attachedTo) = 1
-	some u2, u4: User{
-		some w2:Wall{
-			//comment must not be in the old state of the commenter
-            c not in u3.owns 
-			//new commenter state (u4)
-			//add comment to new commenter user state
-			u4.owns=u3.owns+c
-			//frame conditon for u4
-			u4.friends = u3.friends
-			u4.has = u3.has
+	// attach the comment to the photo
+	(u1 = u3 implies (
+		some u2: User, w2: Wall{
+				//comment must not be in the old state of the commenter
+				w2.contains = (u1.has).contains+c
+				u2.owns = u1.owns + c
+				u2.has = w2
+				has.w2 = u2
+				//frame condtion
+				u2.friends = u1.friends
 
-			
-			//new content owner state (u2)
-			//add new wall state for original content owner
-			w2.contains = (u1.has).contains+c
-			u2.has = w2
-			has.w2 = u2
-			//frame condtion
-			u2.friends = u1.friends
-			u2.owns = u1.owns
+	
+			//update new state with new users
+			s2.users = s1.users - u1 + u2
+	}) and
+	u1 != u3 implies (
+		some u2, u4: User{
+			some w2:Wall{
+			//comment must not be in the old state of the commenter
+            			c not in u3.owns 
+				//new commenter state (u4)
+				//add comment to new commenter user state
+				u4.owns=u3.owns+c
+				//frame conditon for u4
+				u4.friends = u3.friends
+				u4.has = u3.has
+	
+				
+				//new content owner state (u2)
+				//add new wall state for original content owner
+				w2.contains = (u1.has).contains+c
+				u2.has = w2
+				has.w2 = u2
+				//frame condtion
+				u2.friends = u1.friends
+				u2.owns = u1.owns
+			}
+			//update new state with new users
+			s2.users = s1.users - u1 + u2 - u3 + u4
 		}
-		//update new state with new users
-		s2.users = s1.users - u1 + u2 - u3 + u4
-	}
+	))
+	
 
 }
 
@@ -205,20 +223,6 @@ pred unpublishPhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 	//pre condition 
 	//photo must be owned by user (u1)
 	p in u1.owns
-	//new user must still owns the photo
-	p in u2.owns
-
-	//
-	//^attachedTo.p in w1.contains
-
-
-	p in u1.has.contains
-	//no comment in s2 should be attached to p
-	//all c: Comment  | c in s2.users.owns implies c not in ^attachedTo.p
-
-	//user must be in old state
-	u1 in s1.users
-	u2 not in s1.users
 
 	// Ensure w1 and w2 are distinct
 	w1 != w2
@@ -230,9 +234,11 @@ pred unpublishPhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 	
 	//Ensure the relationship between User and Wall
 	u1.has = w1
-	has.w1 = u1
 	u2.has = w2
-	has.w2 = u2
+
+	// all u: User | u in s2.users implies ^attachedTo.p not in u.owns
+
+	// all w: Wall | w in s2.users.has implies ^attachedTo.p not in w.contains
 	
 	//remove photo and all attached content from owner wall
 	w2.contains = w1.contains - p - ^attachedTo.p 

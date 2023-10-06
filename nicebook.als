@@ -22,7 +22,8 @@ check AssertionAddPhoto for 5 but exactly 2 Nicebook
  run GenerateRemovePhotoValidInstance {
  	some s1,s2: Nicebook, u1, u2: User, p:Photo, w1, w2:Wall | s1 != s2 and
  		niceBookInvariants[s1] and removePhoto[s1,s2,u1, u2,p, w1, w2] and niceBookInvariants[s2]
- }
+ } for 13 but exactly 2 Nicebook, exactly 4 Comment, exactly 5 User
+
 
  assert AssertionRemovePhoto {
  	all s1,s2: Nicebook, u1, u2: User, p:Photo, w1, w2:Wall | s1 != s2 and
@@ -83,7 +84,7 @@ run GenerateShareValidInstance {
  run GenerateUnpublishPhotoValidInstance {
  	some s1,s2: Nicebook, u1, u2: User, p:Photo, w1, w2:Wall | s1 != s2 and
  		niceBookInvariants[s1] and unpublishPhoto[s1,s2,u1, u2,p, w1, w2] and niceBookInvariants[s2]
- } for 5 but exactly 2 Nicebook, exactly 2 Comment
+ } for 10 but exactly 2 Nicebook, exactly 3 Comment, exactly 3 User
 
 
  assert AssertionUnpublishPhoto {
@@ -106,3 +107,6 @@ run GenerateShareValidInstance {
  }
  check AssertionUnpublishComment for 5 but exactly 2 Nicebook
 
+ run GenerateValidInstance {
+ 	all s: Nicebook | niceBookInvariants[s]
+ } for 5 but exactly 2 Nicebook, exactly 3 User
