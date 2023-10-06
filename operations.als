@@ -116,8 +116,8 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	c1 in s1.users.owns
 	//comment must not be cyclic
 	(c not in c.^attachedTo) and (c not in ^attachedTo.c)
-	(u3 in (u1).friends and c1.commentPrivacy != OnlyMe and c1.viewPrivacy!=OnlyMe)
-	or (u3 in (u1).friends.friends and (c1.viewPrivacy=Everyone or c1.viewPrivacy=FriendsOfFriends)
+	(u3 in (u1).friends and c1.commentPrivacy != OnlyMe and (owns.c1).viewPrivacy!=OnlyMe)
+	or (u3 in (u1).friends.friends and ((owns.c1).viewPrivacy=Everyone or (owns.c1).viewPrivacy=FriendsOfFriends)
 	and  (c1.commentPrivacy=Everyone  or c1.commentPrivacy=FriendsOfFriends))
 	//post-condition
 
@@ -157,8 +157,8 @@ pred share[u1, u2: User, p: Photo, w1, w2:Wall] {
     // the user owns the content
     p in u1.owns
     // the privacy settings allow the user2 to share the post
-    (u2 in u1.friends and (owns.p).sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
-    or (u2 in u1.friends.friends and (p.viewPrivacy=Everyone or p.viewPrivacy=FriendsOfFriends)
+    (u2 in u1.friends and (owns.p).sharePrivacy != OnlyMe and (owns.p).viewPrivacy!=OnlyMe)
+    or (u2 in u1.friends.friends and ((owns.p).viewPrivacy=Everyone or (owns.p).viewPrivacy=FriendsOfFriends)
     and  ((owns.p).sharePrivacy=Everyone  or (owns.p).sharePrivacy=FriendsOfFriends)) 
     // post condition
     // the post should now show up on the users wall
@@ -176,8 +176,8 @@ pred share[s1, s2: Nicebook, u1,u2:User,  p:Photo]{
 	//u2 is different from owner
 	u2 != u1
 	//user should own that content
-	(u2 in (u1).friends and (owns.p).sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
-	or (u2 in (u1).friends.friends and (p.viewPrivacy=Everyone or p.viewPrivacy=FriendsOfFriends)
+	(u2 in (u1).friends and (owns.p).sharePrivacy != OnlyMe and (owns.p).viewPrivacy!=OnlyMe)
+	or (u2 in (u1).friends.friends and ((owns.p).viewPrivacy=Everyone or (owns.p).viewPrivacy=FriendsOfFriends)
 	and  ((owns.p).sharePrivacy=Everyone  or (owns.p).sharePrivacy=FriendsOfFriends))
 	//post-condition
 	some u3: User{

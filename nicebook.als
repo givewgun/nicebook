@@ -30,6 +30,7 @@ check AssertionAddPhoto for 5 but exactly 2 Nicebook
  }
  check AssertionRemovePhoto for 5 but exactly 2 Nicebook
 
+// got some prob 
  run GeneratePublishValidInstance {
  	some s1,s2: Nicebook, u1: User, p:Photo| s1 != s2 and
  		niceBookInvariants[s1] and publish[s1,s2,u1,p] and niceBookInvariants[s2]
@@ -58,6 +59,8 @@ check AssertionAddPhoto for 5 but exactly 2 Nicebook
 	 		addComment[s1, s2, c1,c,u1,u3]
 	 		implies niceBookInvariants[s2]
  }
+
+//   prob
  check AssertionAddComment for 5 but exactly 2 Nicebook
 
 
