@@ -7,7 +7,7 @@ sig User {
 	owns: some Content,
 	has: one Wall,
  	sharePrivacy : one PrivacySetting,
-	// viewPrivacy: one PrivacySetting,
+	viewPrivacy: one PrivacySetting,
 }
 
 sig Wall {
@@ -16,12 +16,10 @@ sig Wall {
 
 
 abstract sig Content {
-	viewPrivacy: one PrivacySetting,
 	commentPrivacy: one PrivacySetting,
 }
 
 sig Photo extends Content {
- 	// sharePrivacy : one PrivacySetting,
 }
 
 sig Comment extends Content {
