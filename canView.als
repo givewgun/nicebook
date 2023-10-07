@@ -1,23 +1,26 @@
 open Project_Sigs
 
 fun canView(user: User): set Content {
-  // Determine the content that the given 'user' can view based on different privacy settings.
+	// This function determines which content a specific user can view based on privacy settings.
+	
+	// Content with "OnlyMe" privacy setting:
+	// Only the owner of the content can view it, and it must be on a wall.
+	{c: Content | c.viewPrivacy = OnlyMe and c in user.owns and some w: Wall | c in w.contains} +
 
-  // Content with "OnlyMe" privacy setting: Only the owner of the content can view it.
-  {c: Content | c.viewPrivacy = OnlyMe and c in user.owns} +
+	// Content with "Friends" privacy setting:
+	// Either the owner or their direct friends can view it, and it must be on a wall.
+	{c: Content | c.viewPrivacy = Friends and (c in user.owns or c in user.friends.owns) and some w: Wall | c in w.contains} +
 
-  // Content with "Friends" privacy setting: Either the owner or their direct friends can view it.
-  {c: Content | c.viewPrivacy = Friends and (c in user.owns or c in user.friends.owns)} +
+	// Content with "FriendsOfFriends" privacy setting:
+	// The owner, their direct friends, or friends of their friends can view it, 
+	// and it must be on a wall.
+	{c: Content | c.viewPrivacy = FriendsOfFriends and 
+			(c in user.owns or c in user.friends.owns or c in user.friends.friends.owns) and some w: Wall | c in w.contains} +
 
-  // Content with "FriendsOfFriends" privacy setting: The owner, their direct friends, 
-  // or friends of their friends can view it.
-  {c: Content | c.viewPrivacy = FriendsOfFriends and 
-      (c in user.owns or c in user.friends.owns or c in user.friends.friends.owns)} +
-
-  // Content with "Everyone" privacy setting: Any user in the system can view it.
-  {c: Content | c.viewPrivacy = Everyone}
+	// Content with "Everyone" privacy setting:
+	// Any user in the system can view it, and it must be on a wall.
+	{c: Content | c.viewPrivacy = Everyone and some w: Wall | c in w.contains}
 }
-
 
 pred showScenario {
 	some u: User | 
@@ -28,6 +31,10 @@ assert NoPrivacyViolation {
 	// For every user and piece of content that the user can view,
 	// ensure that the viewing is in accordance with the content's privacy setting.
 	all user: User, content: Content | content in canView[user] implies (
+
+		// All contents should be on a wall to be seen
+		(some w: Wall | content in w.contains) and 
+
 		// If the content's privacy is set to "OnlyMe", then only the owner should be able to view it.
 		(content.viewPrivacy = OnlyMe implies content in user.owns) and
 		

@@ -97,16 +97,18 @@ pred publish[s1, s2: Nicebook, u1: User, p: Photo] {
 
 }
 
-pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
+pred addCommentForSelf[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User] {
 	//pre-condition
 	//owner must be in the old state
 	u1 in s1.users
 	//commenter must be in the old state
 	u3 in s1.users
+	//same user
+	u1 = u3
+	//content owned by owner
+	c1 in u1.owns
 	//comment must not exist in the old state
 	c not in s1.users.owns
-	// //comment must not be attached to the content
-	// c not in ^attachedTo.c1
 	// the comment and the peice of content shouldn't be the same 
 	c != c1
 
@@ -117,33 +119,66 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 	c1 in s1.users.owns
 	//comment must not be cyclic
 	(c not in c.^attachedTo) and (c not in ^attachedTo.c)
+	//post-condition
+	//comment attached to only 1 content
+	c.attachedTo = c1
+	#(c.attachedTo) = 1
+	some u2: User, w2: Wall {
+		//create new wall with new comment
+		w2.contains = (u1.has).contains+c
+		//new comment must be only on new wall
+		contains.c = w2
+		//add new comemnt to new user ownership
+		u2.owns = u1.owns + c
+		u2.has = w2
+		has.w2 = u2
+		//frame condtion
+		u2.friends = u1.friends
+	
+	
+	//update new state with new users
+	s2.users = s1.users - u1 + u2
+	}
+}
+
+
+
+pred addCommentForDifferentUser[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User] {
+	//pre-condition
+	//owner must be in the old state
+	u1 in s1.users
+	//commenter must be in the old state
+	u3 in s1.users
+//	//different user
+//	u1 != u3
+	//content owned by owner
+	c1 in u1.owns
+	//comment must not exist in the old state
+	c not in s1.users.owns
+	//comment must not be in the old state of the commenter
+        c not in u3.owns 
+	// the comment and the peice of content shouldn't be the same 
+	c != c1
+
+	//content must be owned in state 1
+	//comment must not be cyclic
+	(c not in c.^attachedTo) and (c not in ^attachedTo.c)
+	//user should own that content
+	c1 in s1.users.owns
+	//comment must not be cyclic
+	(c not in c.^attachedTo) and (c not in ^attachedTo.c)
+	//privacy
 	(u3 in (u1).friends and c1.commentPrivacy != OnlyMe and c1.viewPrivacy!=OnlyMe)
 	or (u3 in (u1).friends.friends and (c1.viewPrivacy=Everyone or c1.viewPrivacy=FriendsOfFriends)
 	and  (c1.commentPrivacy=Everyone  or c1.commentPrivacy=FriendsOfFriends))
 	//post-condition
-	
+	//comment attached to only 1 content
 	c.attachedTo = c1
 	#(c.attachedTo) = 1
-	// attach the comment to the photo
-	(u1 = u3 implies (
-		some u2: User, w2: Wall{
-				//comment must not be in the old state of the commenter
-				w2.contains = (u1.has).contains+c
-				u2.owns = u1.owns + c
-				u2.has = w2
-				has.w2 = u2
-				//frame condtion
-				u2.friends = u1.friends
 
-	
-			//update new state with new users
-			s2.users = s1.users - u1 + u2
-	}) and
-	u1 != u3 implies (
-		some u2, u4: User{
+
+	some u2, u4: User{
 			some w2:Wall{
-			//comment must not be in the old state of the commenter
-            			c not in u3.owns 
 				//new commenter state (u4)
 				//add comment to new commenter user state
 				u4.owns=u3.owns+c
@@ -151,10 +186,12 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 				u4.friends = u3.friends
 				u4.has = u3.has
 	
-				
 				//new content owner state (u2)
 				//add new wall state for original content owner
 				w2.contains = (u1.has).contains+c
+				//new comment must be only on new wall
+				contains.c = w2
+				//set new wall
 				u2.has = w2
 				has.w2 = u2
 				//frame condtion
@@ -164,9 +201,10 @@ pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
 			//update new state with new users
 			s2.users = s1.users - u1 + u2 - u3 + u4
 		}
-	))
-	
+}
 
+pred addComment[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User]{
+	(u1 = u3)  implies addCommentForSelf[s1,s2,c1,c,u1,u3] else addCommentForDifferentUser[s1,s2,c1,c,u1,u3]
 }
 
 
@@ -175,9 +213,9 @@ pred share[u1, u2: User, p: Photo, w1, w2:Wall] {
     // the user owns the content
     p in u1.owns
     // the privacy settings allow the user2 to share the post
-    (u2 in u1.friends and p.sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
+    (u2 in u1.friends and (owns.p).sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
     or (u2 in u1.friends.friends and (p.viewPrivacy=Everyone or p.viewPrivacy=FriendsOfFriends)
-    and  (p.sharePrivacy=Everyone  or p.sharePrivacy=FriendsOfFriends)) 
+    and  ((owns.p).sharePrivacy=Everyone  or (owns.p).sharePrivacy=FriendsOfFriends)) 
     // post condition
     // the post should now show up on the users wall
     w2 in u2.has
@@ -194,9 +232,9 @@ pred share[s1, s2: Nicebook, u1,u2:User,  p:Photo]{
 	//u2 is different from owner
 	u2 != u1
 	//user should own that content
-	(u2 in (u1).friends and p.sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
+	(u2 in (u1).friends and (owns.p).sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
 	or (u2 in (u1).friends.friends and (p.viewPrivacy=Everyone or p.viewPrivacy=FriendsOfFriends)
-	and  (p.sharePrivacy=Everyone  or p.sharePrivacy=FriendsOfFriends))
+	and  ((owns.p).sharePrivacy=Everyone  or (owns.p).sharePrivacy=FriendsOfFriends))
 	//post-condition
 	some u3: User{
 		some w3:Wall{

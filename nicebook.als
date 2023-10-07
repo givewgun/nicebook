@@ -47,10 +47,11 @@ check AssertionAddPhoto for 5 but exactly 2 Nicebook
  run GenerateAddCommentValidInstance {
  	some s1,s2: Nicebook,u1,u3: User, c1:Content, c:Comment | 
  		s1 != s2 and
+		u1 != u3 and
  		niceBookInvariants[s1] and 
  		addComment[s1, s2, c1,c,u1,u3]
  		and niceBookInvariants[s2]
- } for 5 but exactly 2 Nicebook, exactly 2 Comment
+ } for 5 but exactly 2 Nicebook
 
  assert AssertionAddComment {
  		all s1,s2: Nicebook,u1,u3: User, c1:Content, c:Comment | 
