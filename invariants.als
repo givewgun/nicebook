@@ -50,7 +50,8 @@ pred commentNotAddedToUnpublisedContent[s: Nicebook]{
 
 // Ensures a comment is placed on the content owner's wall.
 pred commentMustBeOnAContentOwnerWall[s: Nicebook]{
-	all c, cm: Content | (c not in Comment) implies cm in (owns.c).has.contains
+	//comment must be on the same wall as the content owner wall
+	all c: Content, cm: Comment | (c not in Comment) implies cm in (owns.c).has.contains
 }
 
 // Ensures each comment in a wall is attached to a content in that wall.
@@ -108,9 +109,26 @@ pred wallInvariant[s: Nicebook] {
 	wallOwnedbyAtLeastOneUserAcrossAllState[s]
 }
 
-// Combines all invariants to ensure the integrity of the entire system.
+// Ensure share privacy is being applied 
+pred sharePrivacyInvariant[s: Nicebook, u1,u2:User,  p:Photo]{
+	(u2 in (u1).friends and (owns.p).sharePrivacy != OnlyMe and (owns.p).viewPrivacy!=OnlyMe)
+	or (u2 in (u1).friends.friends and ((owns.p).viewPrivacy=Everyone or (owns.p).viewPrivacy=FriendsOfFriends)
+	and  ((owns.p).sharePrivacy=Everyone  or (owns.p).sharePrivacy=FriendsOfFriends))
+}
+
+
+// Ensure comment privacy is being applied 
+pred commentPrivacyInvariant[s: Nicebook, u1,u2:User,  c1:Content]{
+	(u2 in (u1).friends and c1.commentPrivacy != OnlyMe and u1.viewPrivacy!=OnlyMe)
+	or (u2 in (u1).friends.friends and (u1.viewPrivacy=Everyone or u1.viewPrivacy=FriendsOfFriends)
+	and  (c1.commentPrivacy=Everyone  or c1.commentPrivacy=FriendsOfFriends))
+}
+
+
+
 pred niceBookInvariants[s: Nicebook] {
 	userInvariants[s]
 	contentInvariant[s]
 	wallInvariant[s]
+	all u1,u2: User, p: Photo | (u1 != u2 and u2 in s.users and	u1 in s.users and p in u1.owns) implies sharePrivacyInvariant[s, u1,u2,p]
 }

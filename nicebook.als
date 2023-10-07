@@ -1,8 +1,10 @@
 open Project_Sigs as S
 open invariants as I
 open operations as O
+open canView as C
 
-// This command checks the possibility of adding a photo to the Nicebook state in a valid manner.
+
+
 run GenerateAddPhotoValidInstance {
 	// It specifies an old state s1 and a new state s2, a user u, and a photo p.
 	some s1,s2: Nicebook, u: User, p:Photo | s1 != s2 and

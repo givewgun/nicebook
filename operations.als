@@ -6,7 +6,14 @@ pred addPhoto[s1, s2: Nicebook, u1: User, p: Photo] {
 	
 	// The photo `p` should not be owned by anyone in the initial state (s1)
 	p not in s1.users.owns
-	
+
+	// The photo `p` should not be on any wall in the initial state (s1)
+	p not in s1.users.has.contains
+	// The photo `p` should not be on any wall in the next state (s2)
+	p not in s2.users.has.contains	
+	// nothing should be attached to new photo
+    #(^attachedTo.p) = 0
+	//true
 	//Post-condition:
 	
 	// A user's (u1) state is updated to reflect that they now own the photo `p`
@@ -25,6 +32,11 @@ pred addPhoto[s1, s2: Nicebook, u1: User, p: Photo] {
 		
 		// The ownership of photos in the system state `s2` is updated to include the photo `p`
 		s2.users.owns = s1.users.owns + p
+		s2.users.has = s1.users.has	
+
+		//Ensure the privacy of the new user is the same as the old ones
+		u2.sharePrivacy = u1.sharePrivacy
+		u2.viewPrivacy	= u1.viewPrivacy						
 	}
 }
 
@@ -63,6 +75,9 @@ pred removePhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 
 	// For any user `u3` that owns content attached to the photo `p`, their state should also be updated to reflect the removal of the attached content
 	all u3: owns.(^attachedTo.p) - u1 | removeCommentIfAttachTo[s1,s2, u3, p]
+	//Ensure the privacy of the new user is the same as the old ones
+	u2.sharePrivacy = u1.sharePrivacy
+	u2.viewPrivacy	= u1.viewPrivacy
 }
 
 
@@ -89,6 +104,10 @@ pred removeCommentIfAttachTo[s1, s2: Nicebook, u3: User, c: Content]{
 		
 		// The new system state `s2` will now reflect the updated user state `u4` and exclude the old user state `u3`
 		s2.users = s1.users - u3 + u4
+	
+		//Ensure the privacy of the new user is the same as the old ones
+		u4.sharePrivacy = u3.sharePrivacy
+		u4.viewPrivacy	= u3.viewPrivacy
 	}
 }
 
@@ -129,6 +148,9 @@ pred publish[s1, s2: Nicebook, u1: User, p: Photo] {
 		
 		// Similarly, the new user state (u2) retains the friendship relations from the initial user state (u1)
 		u2.friends = u1.friends 
+		//Ensure the privacy of the new user is the same as the old ones
+		u2.sharePrivacy = u1.sharePrivacy
+		u2.viewPrivacy	= u1.viewPrivacy
 		
 		// Finally, the new system state (s2) should reflect the updated user state (u2) without the old user state (u1)
 		s2.users = s1.users + u2 - u1
@@ -172,22 +194,24 @@ pred addCommentForSelf[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User] {
 
 	// Update the user's state to reflect the new comment
 	some u2: User, w2: Wall {
-			// The new wall state should incorporate the new comment
-			w2.contains = u1.has.contains + c
-			
-			// The new comment should only be present on this updated wall
-			contains.c = w2
-			
-			// The new user state should now own the comment
-			u2.owns = u1.owns + c
-			u2.has = w2
-			has.w2 = u2
-			
-			// Retaining the friendship relations from the old state for the new user state
-			u2.friends = u1.friends
+		// The new wall state should incorporate the new comment
+		w2.contains = (u1.has).contains+c
+		// The new comment should only be present on this updated wall
+		contains.c = w2
+		// The new user state should now own the comment
+		u2.owns = u1.owns + c
+		u2.has = w2
+		has.w2 = u2
+		// Retaining the friendship relations from the old state for the new user state
+		u2.friends = u1.friends
 
-			// The new state of the system should reflect the updated user without the old user
-			s2.users = s1.users - u1 + u2
+		// Retaining the privacy from the old state for the new user state
+		u2.sharePrivacy = u1.sharePrivacy
+		u2.viewPrivacy	= u1.viewPrivacy
+	
+
+		// The new state of the system should reflect the updated user without the old user
+		s2.users = s1.users - u1 + u2
 	}
 }
 
@@ -228,24 +252,33 @@ pred addCommentForDifferentUser[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:
 
 	// Update the users and walls to reflect the added comment.
 	some u2, u4: User{
-		some w2:Wall{
-			// Update the commenter's state.
-			u4.owns=u3.owns+c
-			u4.friends = u3.friends
-			u4.has = u3.has
+			some w2:Wall{
+				// Update the commenter's state.
+				u4.owns=u3.owns+c
+				u4.friends = u3.friends
+				u4.has = u3.has
+				
+				u4.sharePrivacy = u3.sharePrivacy
+				u4.viewPrivacy	= u3.viewPrivacy
+	
+				// Update the content owner's state to include the new comment on their wall.
+				w2.contains = (u1.has).contains+c
+				//new comment must be only on new wall
+				contains.c = w2
+				//set new wall
+				u2.has = w2
+				has.w2 = u2
 
-			// Update the content owner's state to include the new comment on their wall.
-			w2.contains = (u1.has).contains+c
-			contains.c = w2
-			u2.has = w2
-			has.w2 = u2
-			
-			// Frame conditions: Ensure other attributes remain consistent.
-			u2.friends = u1.friends
-			u2.owns = u1.owns
-		}
-		// Reflect changes in the new state.
-		s2.users = s1.users - u1 + u2 - u3 + u4
+				// Frame conditions: Ensure other attributes remain consistent.
+				u2.friends = u1.friends
+				u2.owns = u1.owns
+
+				//Ensure the privacy of the new user is the same as the old ones
+				u2.sharePrivacy = u1.sharePrivacy
+				u2.viewPrivacy	= u1.viewPrivacy
+			}
+			//update new state with new users
+			s2.users = s1.users - u1 + u2 - u3 + u4
 	}
 }
 
@@ -297,6 +330,10 @@ pred share[s1, s2: Nicebook, u1,u2:User,  p:Photo]{
 			// Frame conditions: Ensure other attributes of u3 remain consistent.
 			u3.friends = u2.friends
 			u3.owns = u2.owns
+
+			//Ensure the privacy of the new user is the same as the old ones
+			u3.sharePrivacy = u2.sharePrivacy
+			u3.viewPrivacy	= u2.viewPrivacy
 		}
 		
 		// Update the new state with the new user.
@@ -344,9 +381,15 @@ pred unpublishPhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 
 	// Ensure that the comments attached to the photo are not in the new wall (w2).
 	^attachedTo.p not in w2.contains
+
+	//Ensure the privacy of the new user is the same as the old ones
+	u2.sharePrivacy = u1.sharePrivacy
+	u2.viewPrivacy	= u1.viewPrivacy
 	
 	// Update the user set in the new state by replacing the old user (u1) with the new user (u2).
 	s2.users = s1.users + u2 - u1
+	
+	
 
 	// Handling removal for other users who had comments attached to the main photo.
 	// The operation can proceed for each such user (u3).
@@ -390,6 +433,9 @@ pred unpublishComment[s1, s2: Nicebook, u1, u2: User, c: Comment, w1, w2: Wall] 
 	// Ensure that the comments attached to the main comment are not in the new wall (w2).
 	^attachedTo.c not in w2.contains
 
+	//Ensure the privacy of the new user is the same as the old ones
+	u2.sharePrivacy = u1.sharePrivacy
+	u2.viewPrivacy	= u1.viewPrivacy
 	// Update the user set in the new state by replacing the old user (u1) with the new user (u2).
 	s2.users = s1.users + u2 - u1
 
