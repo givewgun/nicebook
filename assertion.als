@@ -15,30 +15,30 @@ assert InitSatisfiesInvariant {
 check InitSatisfiesInvariant for 5
 
 
-assert AssertionAddPhoto {
+assert AssertionAddPhotoSatisfiesInvariant {
 	all s1,s2: Nicebook, u: User, p:Photo | s1 != s2 and
 		niceBookInvariants[s1] and addPhoto[s1,s2,u,p] implies niceBookInvariants[s2] 
 }
 
-check AssertionAddPhoto for 5 but exactly 2 Nicebook
+check AssertionAddPhotoSatisfiesInvariant for 5 but exactly 2 Nicebook
 
 
- assert AssertionRemovePhoto {
+ assert AssertionRemovePhotoSatisfiesInvariant {
  	all s1,s2: Nicebook, u1, u2: User, p:Photo, w1, w2:Wall | s1 != s2 and
  		niceBookInvariants[s1] and removePhoto[s1,s2,u1, u2,p, w1, w2] implies niceBookInvariants[s2]
  }
- check AssertionRemovePhoto for 5 but exactly 2 Nicebook
+ check AssertionRemovePhotoSatisfiesInvariant for 5 but exactly 2 Nicebook
 
 
 
- assert AssertionPublish {
+ assert AssertionPublishSatisfiesInvariant {
  	all s1,s2: Nicebook, u1: User, p:Photo | s1 != s2 and
  		niceBookInvariants[s1] and publish[s1,s2,u1,p] implies niceBookInvariants[s2]
  }
- check AssertionPublish for 5 but exactly 2 Nicebook
+ check AssertionPublishSatisfiesInvariant for 5 but exactly 2 Nicebook
 
 
- assert AssertionAddCommentForSameUser {
+ assert AssertionAddCommentForSameUserSatisfiesInvariant {
  		all s1,s2: Nicebook,u1,u3: User, c1:Content, c:Comment | 
  			s1 != s2 and
 			u1 = u3 and
@@ -46,9 +46,9 @@ check AssertionAddPhoto for 5 but exactly 2 Nicebook
 	 		addCommentForSelf[s1, s2, c1,c,u1,u3]
 	 		implies niceBookInvariants[s2]
  }
- check AssertionAddCommentForSameUser for 5 but exactly 2 Nicebook
+ check AssertionAddCommentForSameUserSatisfiesInvariant for 5 but exactly 2 Nicebook
 
- assert AssertionAddCommentForDifferentUser {
+ assert AssertionAddCommentForDifferentUserSatisfiesInvariant {
  		all s1,s2: Nicebook,u1,u3: User, c1:Content, c:Comment | 
  			s1 != s2 and
 			u1 != u3 and
@@ -56,48 +56,48 @@ check AssertionAddPhoto for 5 but exactly 2 Nicebook
 	 		addCommentForDifferentUser[s1, s2, c1,c,u1,u3]
 	 		implies niceBookInvariants[s2]
  }
- check AssertionAddCommentForDifferentUser for 5 but exactly 2 Nicebook
+ check AssertionAddCommentForDifferentUserSatisfiesInvariant for 5 but exactly 2 Nicebook
 
- assert AssertionAddComment {
+ assert AssertionAddCommentSatisfiesInvariant {
  		all s1,s2: Nicebook,u1,u3: User, c1:Content, c:Comment | 
  			s1 != s2 and
 	 		niceBookInvariants[s1] and 
 	 		addComment[s1, s2, c1,c,u1,u3]
 	 		implies niceBookInvariants[s2]
  }
- check AssertionAddComment for 5 but exactly 2 Nicebook
+ check AssertionAddCommentSatisfiesInvariant for 5 but exactly 2 Nicebook
 
 
 
- assert AssertionShare{
+ assert AssertionShareSatisfiesInvariant{
 		all s1,s2: Nicebook,u1,u2: User, p:Photo | 
 			s1 != s2 and
 			niceBookInvariants[s1] and 
 			share[s1, s2, u1,u2,p]
 			implies niceBookInvariants[s2]
  }
- check AssertionShare for 5 but exactly 2 Nicebook
+ check AssertionShareSatisfiesInvariant for 5 but exactly 2 Nicebook
 
 
 
- assert AssertionUnpublishPhoto {
+ assert AssertionUnpublishPhotoSatisfiesInvariant {
  	all s1,s2: Nicebook, u1, u2: User, p:Photo, w1, w2:Wall | s1 != s2 and
  		niceBookInvariants[s1] and unpublishPhoto[s1,s2,u1, u2,p, w1, w2] implies niceBookInvariants[s2]
  }
- check AssertionUnpublishPhoto for 5 but exactly 2 Nicebook
+ check AssertionUnpublishPhotoSatisfiesInvariant for 5 but exactly 2 Nicebook
 
 
 
- assert AssertionUnpublishComment {
+ assert AssertionUnpublishCommentSatisfiesInvariant {
  	all s1,s2: Nicebook, u1, u2: User, c:Comment, w1, w2:Wall | s1 != s2 and
  		niceBookInvariants[s1] and unpublishComment[s1,s2,u1, u2,c, w1, w2] implies niceBookInvariants[s2]
  }
- check AssertionUnpublishComment for 5 but exactly 2 Nicebook
+ check AssertionUnpublishCommentSatisfiesInvariant for 5 but exactly 2 Nicebook
 
 
- assert AssertionUnpublish {
+ assert AssertionUnpublishSatisfiesInvariant {
  	all s1,s2: Nicebook, u1, u2: User, c:Content, w1, w2:Wall | s1 != s2 and
  		niceBookInvariants[s1] and unpublish[s1,s2,u1, u2,c, w1, w2] implies niceBookInvariants[s2]
  }
- check AssertionUnpublish for 5 but exactly 2 Nicebook
+ check AssertionUnpublishSatisfiesInvariant for 5 but exactly 2 Nicebook
 
