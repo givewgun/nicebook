@@ -256,7 +256,9 @@ pred share[s1, s2: Nicebook, u1,u2:User,  p:Photo]{
 
 }
 
-
+pred unpublish[s1, s2: Nicebook, u1, u2: User, c: Content, w1, w2: Wall] {
+	(c in Photo) implies unpublishPhoto[s1,s2,u1,u2,c,w1,w2] else unpublishComment[s1,s2,u1,u2,c,w1,w2]
+}
 pred unpublishPhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 	//pre condition 
 	//photo must be owned by user (u1)

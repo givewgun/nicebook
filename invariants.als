@@ -88,7 +88,7 @@ pred wallHaveOneUserInAState[s: Nicebook] {
 	all w: s.users.has |  #(has.w &  s.users) = 1
 }
 
-pred wallInvairant[s: Nicebook] {
+pred wallInvariant[s: Nicebook] {
 	wallHaveOneUserInAState[s] 
 	wallOwnedbyAtLeastOneUserAcrossAllState[s]
 }
@@ -101,5 +101,5 @@ pred wallOwnedbyAtLeastOneUserAcrossAllState[s: Nicebook] {
 pred niceBookInvariants[s: Nicebook] {
 	userInvariants[s]
 	contentInvariant[s]
-	wallInvairant[s]
+	wallInvariant[s]
 }
