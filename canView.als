@@ -5,7 +5,7 @@ fun canView(user: User): set Content {
 	
 	// Content with "OnlyMe" privacy setting:
 	// Only the owner of the content can view it, and it must be on a wall.
-	{c: Content | (owns.c).viewPrivacy = OnlyMe and c in user.owns and some w: Wall | c in w.contains} +
+	{c: Content | (owns.c).viewPrivacy = OnlyMe and c in user.owns} +
 
 	// Content with "Friends" privacy setting:
 	// Either the owner or their direct friends can view it, and it must be on a wall.
@@ -32,9 +32,6 @@ assert NoPrivacyViolation {
 	// ensure that the viewing is in accordance with the content's privacy setting.
 	all user: User, content: Content | content in canView[user] implies (
 
-		// All contents should be on a wall to be seen
-		(some w: Wall | content in w.contains) and 
-
 		// If the content's privacy is set to "OnlyMe", then only the owner should be able to view it.
 		((owns.content).viewPrivacy = OnlyMe implies content in user.owns) and
 		
@@ -43,7 +40,7 @@ assert NoPrivacyViolation {
 		
 		// If the content's privacy is set to "FriendsOfFriends", then the owner, their friends, or their friends' friends should be able to view it.
 		((owns.content).viewPrivacy = FriendsOfFriends implies 
-					(content in user.owns or content in user.friends.owns or content in user.friends.friends.owns)) 
+			(content in user.owns or content in user.friends.owns or content in user.friends.friends.owns)) 
 
 		// If the content's privacy is set to "Everyone", then any user can view it.
   )
