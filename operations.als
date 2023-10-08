@@ -42,43 +42,49 @@ pred addPhoto[s1, s2: Nicebook, u1: User, p: Photo] {
 
 
 pred removePhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
-	//Pre-condition:
-	
-	// The user `u1` should be the owner of the photo `p` in the initial state (s1)
-	p in u1.owns
-	
-	// The walls `w1` and `w2` must be distinct entities
-	w1 != w2
-	
-	//Post-condition:
-	
-	// The new user state `u2` should reflect that the photo `p` and any content attached to `p` are no longer owned by the user
-	u2.owns = u1.owns - p - ^attachedTo.p 
-	
-	// The friends list remains unchanged between the old and new user state
-	u2.friends = u1.friends 
-	
-	// Define the relationship between the user and their wall
-	// In the initial state (s1), user `u1` is related to wall `w1`
-	u1.has = w1
-	// In the updated state (s2), user `u2` is related to wall `w2`
-	u2.has = w2
-	
-	// On the new wall `w2`, the photo `p` and all content attached to `p` are removed
-	w2.contains = w1.contains - p - ^attachedTo.p 
-
-	// Ensure that the content attached to the photo `p` doesn't appear on the new wall `w2`
-	^attachedTo.p not in w2.contains
-	
-	// The system state `s2` should reflect the updated user state `u2` and exclude the old user state `u1`
-	s2.users = s1.users + u2 - u1
-
-	// For any user `u3` that owns content attached to the photo `p`, their state should also be updated to reflect the removal of the attached content
-	all u3: owns.(^attachedTo.p) - u1 | removeCommentIfAttachTo[s1,s2, u3, p]
-	//Ensure the privacy of the new user is the same as the old ones
-	u2.sharePrivacy = u1.sharePrivacy
-	u2.viewPrivacy	= u1.viewPrivacy
+    //Pre-condition:
+    // The user `u1` should be the owner of the photo `p` in the initial state (s1)
+    p in u1.owns
+    
+    // The walls `w1` and `w2` must be distinct entities
+    w1 != w2
+    
+    //Post-condition:
+    
+    // The new user state `u2` should reflect that the photo `p` and any content attached to `p` are no longer owned by the user
+    u2.owns = u1.owns - p - ^attachedTo.p 
+    
+    // The friends list remains unchanged between the old and new user state
+    u2.friends = u1.friends 
+    
+    // Define the relationship between the user and their wall
+    // In the initial state (s1), user `u1` is related to wall `w1`
+    u1.has = w1
+    // In the updated state (s2), user `u2` is related to wall `w2`
+    u2.has = w2
+    
+    // On the new wall `w2`, the photo `p` and all content attached to `p` are removed
+    w2.contains = w1.contains - p - ^attachedTo.p 
+    // Ensure that the content attached to the photo `p` doesn't appear on the new wall `w2`
+    ^attachedTo.p not in w2.contains
+    
+    // The system state `s2` should reflect the updated user state `u2` and exclude the old user state `u1`
+    s2.users = s1.users + u2 - u1
+    // Remove the photo from the walls of all users who shared it.
+      all u3: s2.users | 
+        p in u3.has.contains implies 
+        some w4: Wall {
+            w4 != u3.has
+            w4.contains = u3.has.contains - p -^attachedTo.p
+        u3.has = w4
+        }
+    // For any user `u3` that owns content attached to the photo `p`, their state should also be updated to reflect the removal of the attached content
+    all u3: owns.(^attachedTo.p) - u1 | removeCommentIfAttachTo[s1,s2, u3, p]
+    //Ensure the privacy of the new user is the same as the old ones
+    u2.sharePrivacy = u1.sharePrivacy
+    u2.viewPrivacy  = u1.viewPrivacy
 }
+
 
 
 
