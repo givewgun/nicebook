@@ -34,19 +34,19 @@ assert NoPrivacyViolation {
 		((owns.content).viewPrivacy = OnlyMe implies content in user.owns) and
 		
 		// If the content's privacy is set to "Friends", then either the owner or their friends should be able to view it(if on a wall).
-		// otherwise the user own the content
+		// Or the user own the content
 		((owns.content).viewPrivacy = Friends implies (content in user.owns or 
 			(some w: Wall | content in w.contains and content in user.friends.owns))) and
 		
 		// If the content's privacy is set to "FriendsOfFriends", then the owner, their friends, or their friends' friends should be able to view it(if on a wall).
-		// otherwise the user own the content
+		// Or the user own the content
 		((owns.content).viewPrivacy = FriendsOfFriends implies (
 			content in user.owns or (some w: Wall | content in w.contains and 
 				(content in user.friends.owns or content in user.friends.friends.owns)
 		))) and 
 
 		// If the content's privacy is set to "Everyone", then any user can view it(if on a wall).
-		// otherwise the user own the content
+		// Or the user own the content
 		((owns.content).viewPrivacy = Everyone implies (
 			content in user.owns or some w: Wall | content in w.contains
 		))
