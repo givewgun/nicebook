@@ -7,7 +7,7 @@ fun canView(user: User): set Content {
 	{c: Content | c in user.owns} +
 
 	// Content with "OnlyMe" privacy setting:
-	// Only the owner of the content can view it, and it must be on a wall.
+	// Only the owner of the content can view it.
 	{c: Content | (owns.c).viewPrivacy = OnlyMe and c in user.owns} +
 
 	// Content with "Friends" privacy setting:
