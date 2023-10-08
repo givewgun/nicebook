@@ -3,6 +3,9 @@ open Project_Sigs
 fun canView(user: User): set Content {
 	// This function determines which content a specific user can view based on privacy settings.
 	
+	// if the user owns the content, the user can view it
+	{c: Content | c in user.owns} +
+
 	// Content with "OnlyMe" privacy setting:
 	// Only the owner of the content can view it, and it must be on a wall.
 	{c: Content | (owns.c).viewPrivacy = OnlyMe and c in user.owns} +
@@ -15,7 +18,7 @@ fun canView(user: User): set Content {
 	// The owner, their direct friends, or friends of their friends can view it, 
 	// and it must be on a wall.
 	{c: Content | (owns.c).viewPrivacy = FriendsOfFriends and 
-			(c in user.owns or c in user.friends.owns or c in user.friends.friends.owns) and some w: Wall | c in w.contains} +
+		(c in user.owns or c in user.friends.owns or c in user.friends.friends.owns) and some w: Wall | c in w.contains} +
 
 	// Content with "Everyone" privacy setting:
 	// Any user in the system can view it, and it must be on a wall.
@@ -30,14 +33,23 @@ assert NoPrivacyViolation {
 		// If the content's privacy is set to "OnlyMe", then only the owner should be able to view it.
 		((owns.content).viewPrivacy = OnlyMe implies content in user.owns) and
 		
-		// If the content's privacy is set to "Friends", then either the owner or their friends should be able to view it.
-		((owns.content).viewPrivacy = Friends implies (content in user.owns or content in user.friends.owns)) and
+		// If the content's privacy is set to "Friends", then either the owner or their friends should be able to view it(if on a wall).
+		// otherwise the user own the content
+		((owns.content).viewPrivacy = Friends implies (content in user.owns or 
+			(some w: Wall | content in w.contains and content in user.friends.owns))) and
 		
-		// If the content's privacy is set to "FriendsOfFriends", then the owner, their friends, or their friends' friends should be able to view it.
-		((owns.content).viewPrivacy = FriendsOfFriends implies 
-			(content in user.owns or content in user.friends.owns or content in user.friends.friends.owns)) 
+		// If the content's privacy is set to "FriendsOfFriends", then the owner, their friends, or their friends' friends should be able to view it(if on a wall).
+		// otherwise the user own the content
+		((owns.content).viewPrivacy = FriendsOfFriends implies (
+			content in user.owns or (some w: Wall | content in w.contains and 
+				(content in user.friends.owns or content in user.friends.friends.owns)
+		))) and 
 
-		// If the content's privacy is set to "Everyone", then any user can view it.
+		// If the content's privacy is set to "Everyone", then any user can view it(if on a wall).
+		// otherwise the user own the content
+		((owns.content).viewPrivacy = Everyone implies (
+			content in user.owns or some w: Wall | content in w.contains
+		))
   )
 }
 
