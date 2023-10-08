@@ -1,3 +1,6 @@
+/*
+	Team 10
+*/
 // Importing necessary modules or signatures, invariants, and operations.
 open Project_Sigs as S
 open invariants as I
