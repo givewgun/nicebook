@@ -36,7 +36,7 @@ pred addPhoto[s1, s2: Nicebook, u1: User, p: Photo] {
 
 		//Ensure the privacy of the new user is the same as the old ones
 		u2.sharePrivacy = u1.sharePrivacy
-		u2.viewPrivacy	= u1.viewPrivacy						
+		u2.commentPrivacy	= u1.commentPrivacy						
 	}
 }
 
@@ -82,7 +82,7 @@ pred removePhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
     all u3: owns.(^attachedTo.p) - u1 | removeCommentIfAttachTo[s1,s2, u3, p]
     //Ensure the privacy of the new user is the same as the old ones
     u2.sharePrivacy = u1.sharePrivacy
-    u2.viewPrivacy  = u1.viewPrivacy
+    u2.commentPrivacy  = u1.commentPrivacy
 }
 
 
@@ -113,7 +113,7 @@ pred removeCommentIfAttachTo[s1, s2: Nicebook, u3: User, c: Content]{
 	
 		//Ensure the privacy of the new user is the same as the old ones
 		u4.sharePrivacy = u3.sharePrivacy
-		u4.viewPrivacy	= u3.viewPrivacy
+		u4.commentPrivacy	= u3.commentPrivacy
 	}
 }
 
@@ -156,7 +156,7 @@ pred publish[s1, s2: Nicebook, u1: User, p: Photo] {
 		u2.friends = u1.friends 
 		//Ensure the privacy of the new user is the same as the old ones
 		u2.sharePrivacy = u1.sharePrivacy
-		u2.viewPrivacy	= u1.viewPrivacy
+		u2.commentPrivacy	= u1.commentPrivacy
 		
 		// Finally, the new system state (s2) should reflect the updated user state (u2) without the old user state (u1)
 		s2.users = s1.users + u2 - u1
@@ -213,7 +213,7 @@ pred addCommentForSelf[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:User] {
 
 		// Retaining the privacy from the old state for the new user state
 		u2.sharePrivacy = u1.sharePrivacy
-		u2.viewPrivacy	= u1.viewPrivacy
+		u2.commentPrivacy	= u1.commentPrivacy
 	
 
 		// The new state of the system should reflect the updated user without the old user
@@ -247,9 +247,9 @@ pred addCommentForDifferentUser[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:
 	c1 in s1.users.owns
 	
 	// Verify privacy settings before adding a comment.
-	(u3 in (u1).friends and c1.commentPrivacy != OnlyMe and u1.viewPrivacy!=OnlyMe)
-	or (u3 in (u1).friends.friends and (u1.viewPrivacy=Everyone or u1.viewPrivacy=FriendsOfFriends)
-	and  (c1.commentPrivacy=Everyone  or c1.commentPrivacy=FriendsOfFriends))
+	(u3 in (u1).friends and (owns.c1).commentPrivacy != OnlyMe and c1.viewPrivacy!=OnlyMe)
+	or (u3 in (u1).friends.friends and (c1.viewPrivacy=Everyone or c1.viewPrivacy=FriendsOfFriends)
+	and  ((owns.c1).commentPrivacy=Everyone  or (owns.c1).commentPrivacy=FriendsOfFriends))
 	
 	// Post-condition:
 	// Ensure that the comment is attached to just one content.
@@ -265,7 +265,7 @@ pred addCommentForDifferentUser[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:
 				u4.has = u3.has
 				
 				u4.sharePrivacy = u3.sharePrivacy
-				u4.viewPrivacy	= u3.viewPrivacy
+				u4.commentPrivacy	= u3.commentPrivacy
 	
 				// Update the content owner's state to include the new comment on their wall.
 				w2.contains = (u1.has).contains+c
@@ -281,7 +281,7 @@ pred addCommentForDifferentUser[s1, s2: Nicebook, c1:Content ,c: Comment, u1,u3:
 
 				//Ensure the privacy of the new user is the same as the old ones
 				u2.sharePrivacy = u1.sharePrivacy
-				u2.viewPrivacy	= u1.viewPrivacy
+				u2.commentPrivacy	= u1.commentPrivacy
 			}
 			//update new state with new users
 			s2.users = s1.users - u1 + u2 - u3 + u4
@@ -313,9 +313,9 @@ pred share[s1, s2: Nicebook, u1,u2:User,  p:Photo]{
 	
 	// The sharing permissions should allow u2 to share the content of u1.
 	// Check if u2 is a direct friend of u1 and verify the privacy settings.
-	(u2 in (u1).friends and (owns.p).sharePrivacy != OnlyMe and (owns.p).viewPrivacy!=OnlyMe)
+	(u2 in (u1).friends and (owns.p).sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
 	// Alternatively, check if u2 is a friend of a friend of u1 and verify the privacy settings.
-	or (u2 in (u1).friends.friends and ((owns.p).viewPrivacy=Everyone or (owns.p).viewPrivacy=FriendsOfFriends)
+	or (u2 in (u1).friends.friends and (p.viewPrivacy=Everyone or p.viewPrivacy=FriendsOfFriends)
 	and  ((owns.p).sharePrivacy=Everyone  or (owns.p).sharePrivacy=FriendsOfFriends))
 
 	// Post-condition:
@@ -339,7 +339,7 @@ pred share[s1, s2: Nicebook, u1,u2:User,  p:Photo]{
 
 			//Ensure the privacy of the new user is the same as the old ones
 			u3.sharePrivacy = u2.sharePrivacy
-			u3.viewPrivacy	= u2.viewPrivacy
+			u3.commentPrivacy	= u2.commentPrivacy
 		}
 		
 		// Update the new state with the new user.
@@ -390,7 +390,7 @@ pred unpublishPhoto[s1, s2: Nicebook, u1, u2: User, p: Photo, w1, w2: Wall] {
 
 	//Ensure the privacy of the new user is the same as the old ones
 	u2.sharePrivacy = u1.sharePrivacy
-	u2.viewPrivacy	= u1.viewPrivacy
+	u2.commentPrivacy	= u1.commentPrivacy
 	
 	// Update the user set in the new state by replacing the old user (u1) with the new user (u2).
 	s2.users = s1.users + u2 - u1
@@ -441,7 +441,7 @@ pred unpublishComment[s1, s2: Nicebook, u1, u2: User, c: Comment, w1, w2: Wall] 
 
 	//Ensure the privacy of the new user is the same as the old ones
 	u2.sharePrivacy = u1.sharePrivacy
-	u2.viewPrivacy	= u1.viewPrivacy
+	u2.commentPrivacy	= u1.commentPrivacy
 	// Update the user set in the new state by replacing the old user (u1) with the new user (u2).
 	s2.users = s1.users + u2 - u1
 

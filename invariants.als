@@ -35,7 +35,7 @@ pred contentOwnedbyAtLeastOnceUserAcrossAllState[s: Nicebook] {
 
 // Ensures every piece of content is owned by only one user within a specific state.
 pred contentOwnedbyOnlyOneUserInAState[s: Nicebook] {
-	all c: s.users.owns |  #(owns.c & s.users) = 1
+	all c: Content | c in s.users.owns implies  #(owns.c & s.users) = 1
 }
 
 // Ensures that the comment content doesn't form a cyclic relation.
@@ -81,7 +81,7 @@ pred commentMustBeAttachedToOnePhoto[s: Nicebook]{
 
 // Grouping of all content-related invariants.
 pred contentInvariant[s: Nicebook] {
-	contentOwnedbyOnlyOneUserInAState[s]
+	contentOwnedbyOnlyOneUserInAState[s] //
 	contentOwnedbyAtLeastOnceUserAcrossAllState[s] 
 	all p: Photo | commentMustBeAttachedToSameStateAsPhoto[s,p]  
 	commentNotCyclic[s] 
@@ -98,6 +98,7 @@ pred wallHaveOneUserInAState[s: Nicebook] {
 	all w: s.users.has |  #(has.w &  s.users) = 1
 }
 
+
 // Ensures every wall is associated with at least one user across all states.
 pred wallOwnedbyAtLeastOneUserAcrossAllState[s: Nicebook] {
 	all w: Wall |  #(has.w) > 0
@@ -111,17 +112,18 @@ pred wallInvariant[s: Nicebook] {
 
 // Ensure share privacy is being applied 
 pred sharePrivacyInvariant[s: Nicebook, u1,u2:User,  p:Photo]{
-	(u2 in (u1).friends and (owns.p).sharePrivacy != OnlyMe and (owns.p).viewPrivacy!=OnlyMe)
-	or (u2 in (u1).friends.friends and ((owns.p).viewPrivacy=Everyone or (owns.p).viewPrivacy=FriendsOfFriends)
+	(u2 in (u1).friends and (owns.p).sharePrivacy != OnlyMe and p.viewPrivacy!=OnlyMe)
+	or (u2 in (u1).friends.friends and (p.viewPrivacy=Everyone or p.viewPrivacy=FriendsOfFriends)
 	and  ((owns.p).sharePrivacy=Everyone  or (owns.p).sharePrivacy=FriendsOfFriends))
 }
 
 
+// need check
 // Ensure comment privacy is being applied 
 pred commentPrivacyInvariant[s: Nicebook, u1,u2:User,  c1:Content]{
-	(u2 in (u1).friends and c1.commentPrivacy != OnlyMe and u1.viewPrivacy!=OnlyMe)
-	or (u2 in (u1).friends.friends and (u1.viewPrivacy=Everyone or u1.viewPrivacy=FriendsOfFriends)
-	and  (c1.commentPrivacy=Everyone  or c1.commentPrivacy=FriendsOfFriends))
+	(u2 in (u1).friends and (owns.c1).commentPrivacy != OnlyMe and c1.viewPrivacy!=OnlyMe)
+	or (u2 in (u1).friends.friends and (c1.viewPrivacy=Everyone or c1.viewPrivacy=FriendsOfFriends)
+	and  ((owns.c1).commentPrivacy=Everyone  or (owns.c1).commentPrivacy=FriendsOfFriends))
 }
 
 

@@ -9,7 +9,7 @@ sig User {
 	owns: some Content,           // Content owned by the user.
 	has: one Wall,                // Wall associated with the user.
 	sharePrivacy : one PrivacySetting, // Privacy setting that controls who can share the user's content.
-	viewPrivacy: one PrivacySetting    // Privacy setting that controls who can view the user's content.
+	commentPrivacy: one PrivacySetting  // Privacy setting controlling who can comment on the content. // 
 }
 
 // A signature representing a user's wall which contains content.
@@ -19,7 +19,7 @@ sig Wall {
 
 // An abstract signature representing any type of content (either photo or comment).
 abstract sig Content {
-	commentPrivacy: one PrivacySetting  // Privacy setting controlling who can comment on the content.
+	viewPrivacy: one PrivacySetting    // Privacy setting that controls who can view the user's content. //
 }
 
 // A signature representing photos, which extends the abstract Content signature.
