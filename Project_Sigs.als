@@ -1,3 +1,6 @@
+/*
+	Team 10
+*/
 // A signature representing the entire social network "Nicebook."
 sig Nicebook {
 	users : some User  // Set of all users in the Nicebook.

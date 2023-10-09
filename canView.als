@@ -1,3 +1,6 @@
+/*
+	Team 10
+*/
 open Project_Sigs
 
 fun canView(user: User): set Content {
