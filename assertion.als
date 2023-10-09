@@ -24,7 +24,7 @@ assert AssertionAddPhotoSatisfiesInvariant {
 	all s1,s2: Nicebook, u: User, p:Photo | s1 != s2 and
 		niceBookInvariants[s1] and addPhoto[s1,s2,u,p] implies niceBookInvariants[s2] 
 }
-check AssertionAddPhotoSatisfiesInvariant for 5 but exactly 2 Nicebook
+check AssertionAddPhotoSatisfiesInvariant for 5 but exactly 2 Nicebook, exactly 2 User 
 
 // Assertion to ensure removing a photo doesn't break any invariants.
 assert AssertionRemovePhotoSatisfiesInvariant {
